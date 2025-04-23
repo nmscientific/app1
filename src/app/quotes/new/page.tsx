@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import {useState, useEffect, useRef} from 'react';
+import {natural_language_write_file} from 'src/api/client';
 import {Button} from '@/components/ui/button';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
@@ -156,18 +157,29 @@ export default function NewQuotePage() {
 
   const handleSaveQuote = () => {
     const total = calculateTotal();
-    const newItems = [...quoteItems, {
+    const newItems = [
+      ...quoteItems,
+      {
         id: Date.now(),
-        description: "Total",
+        description: 'Total',
         price: total,
-      },]
+      },
+    ];
     const newQuote = {
       id: Date.now().toString(),
       items: newItems,
       total: total,
-    };    
+    };
 
-    const updatedQuotes = [...(quotes || []), newQuote];
+    natural_language_write_file({
+      path: `quotes/quote-${newQuote.id}.json`,
+      language: 'json',
+      prompt: JSON.stringify(newQuote),
+    });
+
+    setQuoteItems([]);
+
+    const updatedQuotes = [...(quotes || []), newQuote];    
     setQuotes(updatedQuotes);
     localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
     console.log(quotes);
@@ -175,7 +187,7 @@ export default function NewQuotePage() {
 
     toast({
         
-      title: 'Quote Saved!', description: 'Your quote has been saved successfully.',
+      title: 'Quote Saved!', description: `Your quote ${newQuote.id} has been saved successfully.`,
     });
   };
   
@@ -210,7 +222,7 @@ export default function NewQuotePage() {
   };
 
   return (
-    <div className="container mx-auto p-4" key={trigger}>
+    <div className="container mx-auto p-4" key={trigger}>      
       <h1 className="text-2xl font-bold mb-4">New Quote</h1>
 
       <Card className="mb-4">
