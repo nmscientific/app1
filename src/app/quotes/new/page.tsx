@@ -37,14 +37,7 @@ export default function NewQuotePage() {
   const [manualItemDescription, setManualItemDescription] = useState('');
   const [manualItemPrice, setManualItemPrice] = useState<number | null>(null);
   const {toast} = useToast();
-  const [quotes, setQuotes] = useState<Quote[]>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('quotes');
-      return stored ? JSON.parse(stored) : [];
-    }
-    return [];
-  });
-  const [trigger, setTrigger] = useState(0)
+    const [trigger, setTrigger] = useState(0)
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -170,26 +163,32 @@ export default function NewQuotePage() {
       total: total,
     };
 
-    default_api.natural_language_write_file({
-      path: `quotes/quote-${newQuote.id}.json`,
-      language: 'json',
-      prompt: JSON.stringify(newQuote),
-    });
+      try {
+        await default_api.natural_language_write_file({
+          path: `quotes/quote-${newQuote.id}.json`,
+          language: 'json',
+          prompt: JSON.stringify(newQuote),
+        });
 
-    setQuoteItems([]);
+        setQuoteItems([]);
+        setTrigger(trigger + 1);
 
-    const updatedQuotes = [...(quotes || []), newQuote];    
-    setQuotes(updatedQuotes);
-    localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
-    console.log(quotes);
-    setTrigger(trigger + 1);
+        toast({
+          title: 'Quote Saved!',
+          description: `Your quote ${newQuote.id} has been saved successfully.`,
+        });
+      } catch (error) {
+        console.error('Error saving quote:', error);
+        toast({
+          title: 'Error',
+          description: `Failed to save quote: ${error}`,
+          variant: 'destructive',
+        });
+      }
+    };
 
-    toast({
-        
-      title: 'Quote Saved!', description: `Your quote ${newQuote.id} has been saved successfully.`,
-    });
-  };
-  
+
+
   const handlePrintQuote = async () => {
     if (!printRef.current) return;
     try {
