@@ -44,6 +44,7 @@ export default function NewQuotePage() {
     }
     return [];
   });
+  const [trigger, setTrigger] = useState(0)
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -164,6 +165,8 @@ export default function NewQuotePage() {
     const updatedQuotes = [...(quotes || []), newQuote];
     setQuotes(updatedQuotes);
     localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
+    console.log(quotes);
+    setTrigger(trigger + 1);
 
     toast({
       title: 'Quote Saved!', description: 'Your quote has been saved successfully.',
@@ -201,7 +204,7 @@ export default function NewQuotePage() {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4" key={trigger}>
       <h1 className="text-2xl font-bold mb-4">New Quote</h1>
 
       <Card className="mb-4">
