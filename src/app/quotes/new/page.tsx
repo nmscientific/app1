@@ -156,11 +156,16 @@ export default function NewQuotePage() {
 
   const handleSaveQuote = () => {
     const total = calculateTotal();
+    const newItems = [...quoteItems, {
+        id: Date.now(),
+        description: "Total",
+        price: total,
+      },]
     const newQuote = {
       id: Date.now().toString(),
-      items: quoteItems,
+      items: newItems,
       total: total,
-    };
+    };    
 
     const updatedQuotes = [...(quotes || []), newQuote];
     setQuotes(updatedQuotes);
@@ -169,6 +174,7 @@ export default function NewQuotePage() {
     setTrigger(trigger + 1);
 
     toast({
+        
       title: 'Quote Saved!', description: 'Your quote has been saved successfully.',
     });
   };
