@@ -1,24 +1,43 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Product } from "@/types";
+import {useState, useEffect} from 'react';
+import {Button} from '@/components/ui/button';
+import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
+import {Input} from '@/components/ui/input';
+import {Label} from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {Textarea} from '@/components/ui/textarea';
+import {useToast} from '@/hooks/use-toast';
+import {Product} from '@/types';
+
+interface QuoteItem {
+  id: number;
+  description: string;
+  price: string;
+}
+
+interface Quote {
+  id: string;
+  items: QuoteItem[];
+  total: string;
+}
 
 export default function NewQuotePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [width, setWidth] = useState<number | null>(null);
   const [height, setHeight] = useState<number | null>(null);
-  const [quoteItems, setQuoteItems] = useState<any[]>([]);
-  const [manualItemDescription, setManualItemDescription] = useState("");
+  const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([]);
+  const [manualItemDescription, setManualItemDescription] = useState('');
   const [manualItemPrice, setManualItemPrice] = useState<number | null>(null);
-  const { toast } = useToast();
+  const {toast} = useToast();
+  const [quotes, setQuotes] = useState<Quote[]>([]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -30,11 +49,11 @@ export default function NewQuotePage() {
         const initialProducts = await response.json();
         setProducts(initialProducts);
       } catch (error: any) {
-        console.error("Failed to load products:", error);
+        console.error('Failed to load products:', error);
         toast({
-          title: "Error",
+          title: 'Error',
           description: `Failed to load products: ${error.message}`,
-          variant: "destructive",
+          variant: 'destructive',
         });
         setProducts([]);
       }
@@ -57,19 +76,19 @@ export default function NewQuotePage() {
   const addProductToQuote = () => {
     if (!selectedProduct) {
       toast({
-        title: "Error",
-        description: "Please select a product.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Please select a product.',
+        variant: 'destructive',
       });
       return;
     }
 
-    const product = products.find((p) => p.id === selectedProduct);
+    const product = products.find(p => p.id === selectedProduct);
     if (!product) {
       toast({
-        title: "Error",
-        description: "Selected product not found.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Selected product not found.',
+        variant: 'destructive',
       });
       return;
     }
@@ -95,9 +114,9 @@ export default function NewQuotePage() {
   const addManualItemToQuote = () => {
     if (!manualItemDescription || !manualItemPrice) {
       toast({
-        title: "Error",
-        description: "Please enter description and price for manual item.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Please enter description and price for manual item.',
+        variant: 'destructive',
       });
       return;
     }
@@ -112,27 +131,40 @@ export default function NewQuotePage() {
     ]);
 
     // Clear input fields
-    setManualItemDescription("");
+    setManualItemDescription('');
     setManualItemPrice(null);
   };
 
   const calculateTotal = () => {
-    return quoteItems.reduce((total, item) => total + parseFloat(item.price), 0).toFixed(2);
+    return quoteItems
+      .reduce((total, item) => total + parseFloat(item.price), 0)
+      .toFixed(2);
   };
 
   const handleSaveQuote = () => {
-    // TODO: Implement actual save functionality
+    const total = calculateTotal();
+    const newQuote: Quote = {
+      id: Date.now().toString(),
+      items: quoteItems,
+      total: total,
+    };
+
+    setQuotes([...quotes, newQuote]);
+
+    // Save to local storage
+    localStorage.setItem('quotes', JSON.stringify([...quotes, newQuote]));
+
     toast({
-      title: "Quote Saved",
-      description: "Your quote has been saved successfully.",
+      title: 'Quote Saved',
+      description: 'Your quote has been saved successfully.',
     });
   };
 
   const handlePrintQuote = () => {
     // TODO: Implement print functionality
     toast({
-      title: "Print Quote",
-      description: "Opens a print preview.",
+      title: 'Print Quote',
+      description: 'Opens a print preview.',
     });
   };
 
@@ -150,7 +182,7 @@ export default function NewQuotePage() {
               <SelectValue placeholder="Select a product" />
             </SelectTrigger>
             <SelectContent>
-              {products.map((product) => (
+              {products.map(product => (
                 <SelectItem key={product.id} value={product.id}>
                   {product.name}
                 </SelectItem>
@@ -165,8 +197,8 @@ export default function NewQuotePage() {
                 <Input
                   type="number"
                   id="width"
-                  value={width || ""}
-                  onChange={(e) => setWidth(parseFloat(e.target.value))}
+                  value={width || ''}
+                  onChange={e => setWidth(parseFloat(e.target.value))}
                 />
               </div>
               <div>
@@ -174,11 +206,13 @@ export default function NewQuotePage() {
                 <Input
                   type="number"
                   id="height"
-                  value={height || ""}
-                  onChange={(e) => setHeight(parseFloat(e.target.value))}
+                  value={height || ''}
+                  onChange={e => setHeight(parseFloat(e.target.value))}
                 />
               </div>
-              <Button variant="secondary" onClick={addProductToQuote}>Add Product</Button>
+              <Button variant="secondary" onClick={addProductToQuote}>
+                Add Product
+              </Button>
             </div>
           )}
         </CardContent>
@@ -194,7 +228,7 @@ export default function NewQuotePage() {
             <Textarea
               id="description"
               value={manualItemDescription}
-              onChange={(e) => setManualItemDescription(e.target.value)}
+              onChange={e => setManualItemDescription(e.target.value)}
             />
           </div>
           <div>
@@ -202,11 +236,13 @@ export default function NewQuotePage() {
             <Input
               type="number"
               id="price"
-              value={manualItemPrice || ""}
-              onChange={(e) => setManualItemPrice(parseFloat(e.target.value))}
+              value={manualItemPrice || ''}
+              onChange={e => setManualItemPrice(parseFloat(e.target.value))}
             />
           </div>
-          <Button variant="secondary" onClick={addManualItemToQuote}>Add Manual Item</Button>
+          <Button variant="secondary" onClick={addManualItemToQuote}>
+            Add Manual Item
+          </Button>
         </CardContent>
       </Card>
 
@@ -216,7 +252,7 @@ export default function NewQuotePage() {
         </CardHeader>
         <CardContent>
           <ul>
-            {quoteItems.map((item) => (
+            {quoteItems.map(item => (
               <li key={item.id} className="mb-2">
                 {item.description} - ${item.price}
               </li>
@@ -227,7 +263,9 @@ export default function NewQuotePage() {
       </Card>
 
       <div className="flex justify-end gap-2">
-        <Button variant="primary" onClick={handleSaveQuote}>Finalize and Save Quote</Button>
+        <Button variant="primary" onClick={handleSaveQuote}>
+          Finalize and Save Quote
+        </Button>
         <Button onClick={handlePrintQuote}>Print</Button>
       </div>
     </div>

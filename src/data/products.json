@@ -1,0 +1,17 @@
+[
+  {
+    "id": "1745368799722",
+    "name": "Paper Window 1/8",
+    "pricePerSqFt": 0.25
+  },
+  {
+    "id": "1745368858003",
+    "name": "Steel Window 1/4",
+    "pricePerSqFt": 100.25
+  },
+  {
+    "id": "1745368890997",
+    "name": "Test Entry",
+    "pricePerSqFt": 3.05
+  }
+]
