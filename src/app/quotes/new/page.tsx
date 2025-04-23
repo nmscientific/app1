@@ -1,7 +1,7 @@
 'use client';
 
-import {useState, useEffect, useRef} from 'react';
-import {natural_language_write_file} from 'src/api/client';
+import { useState, useEffect, useRef } from 'react';
+import { natural_language_write_file } from '@/api';
 import {Button} from '@/components/ui/button';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
