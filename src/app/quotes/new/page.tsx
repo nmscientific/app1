@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useEffect} from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {Button} from '@/components/ui/button';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {Textarea} from '@/components/ui/textarea';
+import { Textarea } from '@/components/ui/textarea';
 import {useToast} from '@/hooks/use-toast';
 import {Product} from '@/types';
 
@@ -37,15 +37,28 @@ export default function NewQuotePage() {
   const [manualItemDescription, setManualItemDescription] = useState('');
   const [manualItemPrice, setManualItemPrice] = useState<number | null>(null);
   const {toast} = useToast();
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-
-  useEffect(() => {
+  const [quotes, setQuotes] = useState<Quote[]>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('quotes');
-      if (stored) {
-        setQuotes(JSON.parse(stored));
-      }
+      return stored ? JSON.parse(stored) : [];
     }
+    return [];
+  });
+  const printRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('quotes', JSON.stringify(quotes));
+  }, [quotes]);
+
+  useEffect(() => {
+    const loadQuotes = () => {
+        if (typeof window !== 'undefined') {
+            const storedQuotes = localStorage.getItem('quotes');
+            if (storedQuotes) setQuotes(JSON.parse(storedQuotes));
+        }
+    }
+    loadQuotes()
   }, []);
 
   useEffect(() => {
@@ -166,13 +179,35 @@ export default function NewQuotePage() {
       title: 'Quote Saved!', description: 'Your quote has been saved successfully.',
     });
   };
+  
+  const handlePrintQuote = async () => {
+    if (!printRef.current) return;
+    try {
+        const printWindow = window.open('', '', 'height=600,width=800');
+        if (!printWindow) {
+            throw new Error('Failed to open print window.');
+        }
 
-  const handlePrintQuote = () => {
-    // TODO: Implement print functionality
-    toast({
-      title: 'Print Quote',
-      description: 'Opens a print preview.',
-    });
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Quote</title>
+                    <style>
+                        body { font-family: sans-serif; }
+                        .quote-item { margin-bottom: 10px; }
+                        .total { font-weight: bold; margin-top: 20px; }
+                    </style>
+                </head>
+                <body>${printRef.current.innerHTML}</body>
+            </html>
+        `);
+        printWindow.document.close();
+        await new Promise(resolve => printWindow.onload = resolve);
+        printWindow.print();
+        printWindow.close();
+    } catch (err) {
+        console.error("Error opening print window:", err);
+    }
   };
 
   return (
@@ -254,24 +289,28 @@ export default function NewQuotePage() {
       </Card>
 
       <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Quote Items</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul>
-            {quoteItems.map(item => (
-              <li key={item.id} className="mb-2">
-                {item.description} - ${item.price}
-              </li>
-            ))}
-          </ul>
-           <div className="text-xl font-bold">Total: ${calculateTotal()}</div>        </CardContent>
+            <CardHeader>
+                <CardTitle>Quote Items</CardTitle>
+            </CardHeader>
+            <CardContent ref={printRef}>
+                <ul>
+                    {quoteItems.map(item => (
+                        <li key={item.id} className="quote-item">
+                            {item.description} - ${item.price}
+                        </li>
+                    ))}
+                </ul>
+                <div className="total">Total: ${calculateTotal()}</div>
+            </CardContent>
       </Card>      
       
-      <div className="flex justify-end">
-        <Button variant="primary" onClick={handleSaveQuote}>
-          Save
-        </Button>        
+      <div className="flex justify-end gap-2">
+          <Button variant="primary" onClick={handleSaveQuote}>
+              Save
+          </Button>
+          <Button onClick={handlePrintQuote}>
+              Print
+          </Button>
       </div>
     </div>
   );
