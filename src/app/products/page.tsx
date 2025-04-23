@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import fs from 'fs/promises';
+import path from 'path';
 
 interface Product {
   id: string;
@@ -13,11 +15,48 @@ interface Product {
   pricePerSqFt: number;
 }
 
+const dataFilePath = path.join(process.cwd(), 'src/data/products.json');
+
+async function readProductsFromFile(): Promise<Product[]> {
+  try {
+    const fileContent = await fs.readFile(dataFilePath, 'utf-8');
+    return JSON.parse(fileContent);
+  } catch (error) {
+    console.error("Error reading products from file:", error);
+    return [];
+  }
+}
+
+async function writeProductsToFile(products: Product[]): Promise<void> {
+  try {
+    await fs.writeFile(dataFilePath, JSON.stringify(products, null, 2), 'utf-8');
+  } catch (error) {
+    console.error("Error writing products to file:", error);
+  }
+}
+
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [newProductName, setNewProductName] = useState("");
   const [newProductPrice, setNewProductPrice] = useState<number | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      const initialProducts = await readProductsFromFile();
+      setProducts(initialProducts);
+    };
+
+    loadProducts();
+  }, []);
+
+  useEffect(() => {
+    const saveProducts = async () => {
+      await writeProductsToFile(products);
+    };
+
+    saveProducts();
+  }, [products]);
 
   const addProduct = () => {
     if (!newProductName || !newProductPrice) {

@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,15 +8,30 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import fs from 'fs/promises';
+import path from 'path';
 
-// Mock product data (replace with actual data fetching)
-const products = [
-  { id: "1", name: "Standard Glass", description: "Regular glass", pricePerSqFt: 2.50 },
-  { id: "2", name: "Tempered Glass", description: "Stronger glass", pricePerSqFt: 4.00 },
-  { id: "3", name: "Laminated Glass", description: "Safety glass", pricePerSqFt: 5.50 },
-];
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  pricePerSqFt: number;
+}
+
+const dataFilePath = path.join(process.cwd(), 'src/data/products.json');
+
+async function readProductsFromFile(): Promise<Product[]> {
+  try {
+    const fileContent = await fs.readFile(dataFilePath, 'utf-8');
+    return JSON.parse(fileContent);
+  } catch (error) {
+    console.error("Error reading products from file:", error);
+    return [];
+  }
+}
 
 export default function NewQuotePage() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [width, setWidth] = useState<number | null>(null);
   const [height, setHeight] = useState<number | null>(null);
@@ -25,6 +39,15 @@ export default function NewQuotePage() {
   const [manualItemDescription, setManualItemDescription] = useState("");
   const [manualItemPrice, setManualItemPrice] = useState<number | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      const initialProducts = await readProductsFromFile();
+      setProducts(initialProducts);
+    };
+
+    loadProducts();
+  }, []);
 
   const handleProductSelect = (productId: string) => {
     setSelectedProduct(productId);
