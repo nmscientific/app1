@@ -37,7 +37,7 @@ export default function NewQuotePage() {
   const [manualItemDescription, setManualItemDescription] = useState('');
   const [manualItemPrice, setManualItemPrice] = useState<number | null>(null);
   const {toast} = useToast();
-  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [quotes, setQuotes] = useState<Quote[]>(() => { const stored = localStorage.getItem('quotes'); return stored ? JSON.parse(stored) : [];});
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -61,14 +61,6 @@ export default function NewQuotePage() {
 
     loadProducts();
   }, [toast]);
-
-  useEffect(() => {
-    // Load quotes from local storage on component mount
-    const storedQuotes = localStorage.getItem('quotes');
-    if (storedQuotes) {
-      setQuotes(JSON.parse(storedQuotes));
-    }
-  }, []);
 
   const handleProductSelect = (productId: string) => {
     setSelectedProduct(productId);
@@ -157,14 +149,12 @@ export default function NewQuotePage() {
       total: total,
     };
 
-    // Update quotes state and local storage
-    const updatedQuotes = [...(quotes || []), newQuote]; // Handle initial undefined state
+    const updatedQuotes = [...quotes, newQuote];
     setQuotes(updatedQuotes);
     localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
 
     toast({
-      title: 'Quote Saved',
-      description: 'Your quote has been saved successfully.',
+      title: 'Quote Saved!', description: 'Your quote has been saved successfully.',
     });
   };
 
@@ -266,8 +256,7 @@ export default function NewQuotePage() {
               </li>
             ))}
           </ul>
-          <div className="text-xl font-bold">Total: ${calculateTotal()}</div>
-        </CardContent>
+           <div className="text-xl font-bold">Total: ${calculateTotal()}</div>        </CardContent>
       </Card>      
       
       <div className="flex justify-end">
