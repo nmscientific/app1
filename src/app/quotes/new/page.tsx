@@ -8,27 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import fs from 'fs/promises';
-import path from 'path';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  pricePerSqFt: number;
-}
-
-const dataFilePath = path.join(process.cwd(), 'src/data/products.json');
-
-async function readProductsFromFile(): Promise<Product[]> {
-  try {
-    const fileContent = await fs.readFile(dataFilePath, 'utf-8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error("Error reading products from file:", error);
-    return [];
-  }
-}
+import { Product } from "@/types";
 
 export default function NewQuotePage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -42,12 +22,26 @@ export default function NewQuotePage() {
 
   useEffect(() => {
     const loadProducts = async () => {
-      const initialProducts = await readProductsFromFile();
-      setProducts(initialProducts);
+      try {
+        const response = await fetch('/api/products');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const initialProducts = await response.json();
+        setProducts(initialProducts);
+      } catch (error: any) {
+        console.error("Failed to load products:", error);
+        toast({
+          title: "Error",
+          description: `Failed to load products: ${error.message}`,
+          variant: "destructive",
+        });
+        setProducts([]);
+      }
     };
 
     loadProducts();
-  }, []);
+  }, [toast]);
 
   const handleProductSelect = (productId: string) => {
     setSelectedProduct(productId);
@@ -87,7 +81,7 @@ export default function NewQuotePage() {
       ...quoteItems,
       {
         id: Date.now(),
-        description: `${product.name} - ${product.description} (${width}x${height})`,
+        description: `${product.name} - (${width}x${height})`,
         price: price.toFixed(2),
       },
     ]);

@@ -6,34 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import fs from 'fs/promises';
-import path from 'path';
-
-interface Product {
-  id: string;
-  name: string;
-  pricePerSqFt: number;
-}
-
-const dataFilePath = path.join(process.cwd(), 'src/data/products.json');
-
-async function readProductsFromFile(): Promise<Product[]> {
-  try {
-    const fileContent = await fs.readFile(dataFilePath, 'utf-8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error("Error reading products from file:", error);
-    return [];
-  }
-}
-
-async function writeProductsToFile(products: Product[]): Promise<void> {
-  try {
-    await fs.writeFile(dataFilePath, JSON.stringify(products, null, 2), 'utf-8');
-  } catch (error) {
-    console.error("Error writing products to file:", error);
-  }
-}
+import { Product } from "@/types";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -43,22 +16,28 @@ export default function ProductsPage() {
 
   useEffect(() => {
     const loadProducts = async () => {
-      const initialProducts = await readProductsFromFile();
-      setProducts(initialProducts);
+      try {
+        const response = await fetch('/api/products');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const initialProducts = await response.json();
+        setProducts(initialProducts);
+      } catch (error: any) {
+        console.error("Failed to load products:", error);
+        toast({
+          title: "Error",
+          description: `Failed to load products: ${error.message}`,
+          variant: "destructive",
+        });
+        setProducts([]);
+      }
     };
 
     loadProducts();
-  }, []);
+  }, [toast]);
 
-  useEffect(() => {
-    const saveProducts = async () => {
-      await writeProductsToFile(products);
-    };
-
-    saveProducts();
-  }, [products]);
-
-  const addProduct = () => {
+  const addProduct = async () => {
     if (!newProductName || !newProductPrice) {
       toast({
         title: "Error",
@@ -74,14 +53,34 @@ export default function ProductsPage() {
       pricePerSqFt: newProductPrice,
     };
 
-    setProducts([...products, newProduct]);
-    setNewProductName("");
-    setNewProductPrice(null);
+    try {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([...products, newProduct]),
+      });
 
-    toast({
-      title: "Success",
-      description: `${newProductName} added to products.`,
-    });
+      if (!response.ok) {
+        throw new Error(`Failed to save products: ${response.status}`);
+      }
+
+      setProducts([...products, newProduct]);
+      setNewProductName("");
+      setNewProductPrice(null);
+
+      toast({
+        title: "Success",
+        description: "Product added successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: `Failed to add product: ${error.message}`,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -113,7 +112,9 @@ export default function ProductsPage() {
               }
             />
           </div>
-          <Button onClick={addProduct}>Add Product</Button>
+          <Button onClick={addProduct}>
+             Add Product
+          </Button>
         </CardContent>
       </Card>
 
