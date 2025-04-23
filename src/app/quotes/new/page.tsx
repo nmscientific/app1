@@ -62,6 +62,14 @@ export default function NewQuotePage() {
     loadProducts();
   }, [toast]);
 
+  useEffect(() => {
+    // Load quotes from local storage on component mount
+    const storedQuotes = localStorage.getItem('quotes');
+    if (storedQuotes) {
+      setQuotes(JSON.parse(storedQuotes));
+    }
+  }, []);
+
   const handleProductSelect = (productId: string) => {
     setSelectedProduct(productId);
   };
@@ -143,16 +151,16 @@ export default function NewQuotePage() {
 
   const handleSaveQuote = () => {
     const total = calculateTotal();
-    const newQuote: Quote = {
+    const newQuote = {
       id: Date.now().toString(),
       items: quoteItems,
       total: total,
     };
 
-    setQuotes([...quotes, newQuote]);
-
-    // Save to local storage
-    localStorage.setItem('quotes', JSON.stringify([...quotes, newQuote]));
+    // Update quotes state and local storage
+    const updatedQuotes = [...quotes, newQuote];
+    setQuotes(updatedQuotes);
+    localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
 
     toast({
       title: 'Quote Saved',
