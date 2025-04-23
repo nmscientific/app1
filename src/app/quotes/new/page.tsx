@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { natural_language_write_file } from '@/api';
+import { useState, useEffect, useRef } from 'react';import { default_api } from '@/api';
 import {Button} from '@/components/ui/button';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
@@ -171,7 +170,7 @@ export default function NewQuotePage() {
       total: total,
     };
 
-    natural_language_write_file({
+    default_api.natural_language_write_file({
       path: `quotes/quote-${newQuote.id}.json`,
       language: 'json',
       prompt: JSON.stringify(newQuote),
