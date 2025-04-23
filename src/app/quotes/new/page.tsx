@@ -147,7 +147,7 @@ export default function NewQuotePage() {
       .toFixed(2);
   };
 
-  const handleSaveQuote = () => {
+  const handleSaveQuote = async () => {
     const total = calculateTotal();
     const newItems = [
       ...quoteItems,
