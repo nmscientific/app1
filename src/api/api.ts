@@ -8,8 +8,27 @@ class Api {
     language: string;
     prompt: string;
   }): Promise<any> {
-    console.log('natural_language_write_file called with:', options);
-    return await default_api.natural_language_write_file(options);
+    const { path, prompt } = options;
+    try {
+      
+      try {
+        await default_api.read_file(path);
+        await default_api.delete_file(path);
+      } catch(e) {
+        
+      }
+
+      const createFileResponse = await default_api.read_file({
+        path,
+        prompt
+      });
+
+        return { result: "The file was created", status: "succeeded" };
+
+    } catch (error) {
+        console.error('Error saving quote:', error);
+        return { result: `Failed to save quote: ${error}`, status: "failed" };
+    }
   }
 
   async delete_file(path: string): Promise<any> {
