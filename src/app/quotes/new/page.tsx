@@ -158,7 +158,7 @@ export default function NewQuotePage() {
     };
 
     // Update quotes state and local storage
-    const updatedQuotes = [...quotes, newQuote];
+    const updatedQuotes = [...(quotes || []), newQuote]; // Handle initial undefined state
     setQuotes(updatedQuotes);
     localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
 
