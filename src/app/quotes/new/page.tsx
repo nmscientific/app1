@@ -1,6 +1,8 @@
+tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';import { default_api } from '/home/jrentz/app1/src/api';
+import { useState, useEffect, useRef } from 'react';
+import { default_api } from '/home/jrentz/app1/src/api';
 import {Button} from '@/components/ui/button';
 import {Card, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {Input} from '@/components/ui/input';
@@ -39,11 +41,6 @@ export default function NewQuotePage() {
   const {toast} = useToast();
     const [trigger, setTrigger] = useState(0)
   const printRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('quotes', JSON.stringify(quotes));
-  }, [quotes]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -163,7 +160,6 @@ export default function NewQuotePage() {
       total: total,
     };
 
-    console.log('Saving quote to:', `quotes/quote-${newQuote.id}.json`);
       try {
         await default_api.natural_language_write_file({
           path: `quotes/quote-${newQuote.id}.json`,
@@ -172,7 +168,7 @@ export default function NewQuotePage() {
         });
 
         setQuoteItems([]);
-        setTrigger(trigger + 1);
+        setTrigger((prev) => prev + 1);
 
         toast({
           title: "Quote Saved!",
