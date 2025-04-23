@@ -52,16 +52,6 @@ export default function NewQuotePage() {
   }, [quotes]);
 
   useEffect(() => {
-    const loadQuotes = () => {
-        if (typeof window !== 'undefined') {
-            const storedQuotes = localStorage.getItem('quotes');
-            if (storedQuotes) setQuotes(JSON.parse(storedQuotes));
-        }
-    }
-    loadQuotes()
-  }, []);
-
-  useEffect(() => {
     const loadProducts = async () => {
       try {
         const response = await fetch('/api/products');
@@ -171,7 +161,7 @@ export default function NewQuotePage() {
       total: total,
     };
 
-    const updatedQuotes = [...quotes, newQuote];
+    const updatedQuotes = [...(quotes || []), newQuote];
     setQuotes(updatedQuotes);
     localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
 
