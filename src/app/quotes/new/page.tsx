@@ -268,13 +268,12 @@ export default function NewQuotePage() {
           </ul>
           <div className="text-xl font-bold">Total: ${calculateTotal()}</div>
         </CardContent>
-      </Card>
-
-      <div className="flex justify-end gap-2">
+      </Card>      
+      
+      <div className="flex justify-end">
         <Button variant="primary" onClick={handleSaveQuote}>
-          Finalize and Save Quote
-        </Button>
-        <Button onClick={handlePrintQuote}>Print</Button>
+          Save
+        </Button>        
       </div>
     </div>
   );
