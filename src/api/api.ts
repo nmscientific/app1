@@ -8,6 +8,7 @@ class Api {
     language: string;
     prompt: string;
   }): Promise<any> {
+    console.log('natural_language_write_file called with:', options);
     return await default_api.natural_language_write_file(options);
   }
 

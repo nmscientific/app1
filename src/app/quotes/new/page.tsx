@@ -163,10 +163,11 @@ export default function NewQuotePage() {
       total: total,
     };
 
+    console.log('Saving quote to:', `quotes/quote-${newQuote.id}.json`);
       try {
         await default_api.natural_language_write_file({
           path: `quotes/quote-${newQuote.id}.json`,
-          language: 'json',
+          language: "json",
           prompt: JSON.stringify(newQuote),
         });
 
@@ -174,7 +175,7 @@ export default function NewQuotePage() {
         setTrigger(trigger + 1);
 
         toast({
-          title: 'Quote Saved!',
+          title: "Quote Saved!",
           description: `Your quote ${newQuote.id} has been saved successfully.`,
         });
       } catch (error) {
@@ -184,7 +185,7 @@ export default function NewQuotePage() {
           description: `Failed to save quote: ${error}`,
           variant: 'destructive',
         });
-      }
+      }    
     };
 
 
