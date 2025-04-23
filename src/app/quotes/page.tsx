@@ -1,5 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function QuotesPage() {
   // Placeholder for fetching and displaying existing quotes
@@ -18,11 +20,15 @@ export default function QuotesPage() {
             <CardDescription>Date: {quote.date}</CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Add links or actions to view, edit, or delete the quote */}
-            <p>Actions: View | Edit | Delete</p>
+            <div className="flex gap-2">
+              <Link href={`/quotes/${quote.id}`}><Button variant="outline">View</Button></Link>
+              <Link href={`/quotes/edit/${quote.id}`}><Button variant="secondary">Edit</Button></Link>
+              <Button variant="destructive">Delete</Button>
+            </div>
           </CardContent>
         </Card>
       ))}
     </div>
   );
 }
+
