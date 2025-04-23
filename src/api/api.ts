@@ -8,17 +8,16 @@ class Api {
     language: string;
     prompt: string;
   }): Promise<any> {
-    const { path, prompt } = options;
+    const { path, prompt, language } = options;
     try {
-      
       try {
         await default_api.read_file(path);
         await default_api.delete_file(path);
       } catch(e) {
         
       }
-
-      const createFileResponse = await default_api.read_file({
+      
+      const createFileResponse = await default_api.create_file({
         path,
         prompt
       });
