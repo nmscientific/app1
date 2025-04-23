@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Plus, Settings } from 'lucide-react';
 import Link from "next/link";
-import { default_api } from '@/api';
+import { default_api } from './api';
 import { useEffect, useState } from 'react';
 import { Quote } from '@/types';
 
