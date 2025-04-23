@@ -37,7 +37,16 @@ export default function NewQuotePage() {
   const [manualItemDescription, setManualItemDescription] = useState('');
   const [manualItemPrice, setManualItemPrice] = useState<number | null>(null);
   const {toast} = useToast();
-  const [quotes, setQuotes] = useState<Quote[]>(() => { const stored = localStorage.getItem('quotes'); return stored ? JSON.parse(stored) : [];});
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('quotes');
+      if (stored) {
+        setQuotes(JSON.parse(stored));
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const loadProducts = async () => {
